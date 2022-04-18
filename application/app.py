@@ -1,11 +1,11 @@
 from user import User
 from application import TextGenerator
 from application import Statistics
+from application import KBHit
 import textwrap
 import sys
 import time
 import msvcrt
-
 
 class Application:
     def __init__(self, words_count: int, user: User):
@@ -52,6 +52,7 @@ class Application:
         print(formatted)
 
     def timed_input(self, caption, timeout):
+        kb = KBHit.KBHit()
         def echo(c):
             sys.stdout.write(c)
             sys.stdout.flush()
@@ -61,8 +62,8 @@ class Application:
         start = time.monotonic()
         try:
             while time.monotonic() - start < timeout:
-                if msvcrt.kbhit():
-                    c = msvcrt.getwch()
+                if kb.kbhit():
+                    c = kb.getch()
                     if self.gen.__next__() != c:
                         print("->", end="")
                     if ord(c) == 13:
