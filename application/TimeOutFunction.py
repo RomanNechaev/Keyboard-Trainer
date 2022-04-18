@@ -25,23 +25,3 @@ class TimeoutFunction:
 
     def raise_timeout(self, signum, frame):
         raise TimeoutError
-
-    def timed_input(self, caption):
-        def echo(c):
-            sys.stdout.write(c)
-            sys.stdout.flush()
-
-        echo(caption)
-        result = []
-        start = time.monotonic()
-        while time.monotonic() - start < self.timeout:
-            if msvcrt.kbhit():
-                c = msvcrt.getwch()
-                if ord(c) == 13:
-                    echo("\r\n")
-                    break
-                result.append(str(c))
-                echo(c)
-
-        if result:
-            return result
