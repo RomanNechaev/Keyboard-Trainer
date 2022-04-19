@@ -17,16 +17,15 @@ class Application:
 
     def run_app(self):
         self.show_text()
-        user_words = []
-        if self.user.os_name == "Windows":
-            user_input = self.timed_input("\nLets Go\n", 30)
-            user_words = self.parse_to_world(user_input)
+        user_input = self.timed_input("\nLets Go\n", 5)
+        user_words = self.parse_to_world(user_input)
         stat = Statistics.Statistics(user_words, self.text)
         stat.find_mistakes()
         print(stat)
 
     def words_for_parse(self):
-        words = list(map(lambda x: x.__add__(" "), self.text))
+        words = list(map(lambda x: x.replace("\n", ""), self.text))
+        words = list(map(lambda x: x.__add__(" "), words))
         return words
 
     @staticmethod

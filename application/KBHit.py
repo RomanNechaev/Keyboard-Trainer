@@ -46,6 +46,16 @@ class KBHit:
         else:
             return sys.stdin.read(1)
 
+    def set_normal_term(self):
+        ''' Resets to normal terminal.  On Windows this is a no-op.
+        '''
+
+        if os.name == 'nt':
+            pass
+
+        else:
+            termios.tcsetattr(self.fd, termios.TCSAFLUSH, self.old_term)
+
     def kbhit(self):
         """Returns True if keyboard character was hit, False otherwise."""
         if os.name == "nt":
