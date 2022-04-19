@@ -5,7 +5,8 @@ from application import KBHit
 import textwrap
 import sys
 import time
-import msvcrt
+from colorama import init, Fore
+
 
 class Application:
     def __init__(self, words_count: int, user: User):
@@ -52,7 +53,9 @@ class Application:
         print(formatted)
 
     def timed_input(self, caption, timeout):
+        init(autoreset=True)
         kb = KBHit.KBHit()
+
         def echo(c):
             sys.stdout.write(c)
             sys.stdout.flush()
@@ -65,7 +68,7 @@ class Application:
                 if kb.kbhit():
                     c = kb.getch()
                     if self.gen.__next__() != c:
-                        print("->", end="")
+                        print(Fore.BLUE + "->", end="")
                     if ord(c) == 13:
                         echo("\r\n")
                         break

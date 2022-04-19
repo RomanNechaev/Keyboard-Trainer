@@ -1,7 +1,7 @@
 import os
 
 # Windows
-if os.name == 'nt':
+if os.name == "nt":
     import msvcrt
 
 # Posix (Linux, OS X)
@@ -13,12 +13,10 @@ else:
 
 
 class KBHit:
-
     def __init__(self):
-        '''Creates a KBHit object that you can call to do various keyboard things.
-        '''
+        """Creates a KBHit object that you can call to do various keyboard things."""
 
-        if os.name == 'nt':
+        if os.name == "nt":
             pass
 
         else:
@@ -29,34 +27,30 @@ class KBHit:
             self.old_term = termios.tcgetattr(self.fd)
 
             # New terminal setting unbuffered
-            self.new_term[3] = (self.new_term[3] & ~termios.ICANON & ~termios.ECHO)
+            self.new_term[3] = self.new_term[3] & ~termios.ICANON & ~termios.ECHO
             termios.tcsetattr(self.fd, termios.TCSAFLUSH, self.new_term)
 
             # Support normal-terminal reset at exit
             atexit.register(self.set_normal_term)
 
-
-
     def getch(self):
-        ''' Returns a keyboard character after kbhit() has been called.
-            Should not be called in the same program as getarrow().
-        '''
+        """Returns a keyboard character after kbhit() has been called.
+        Should not be called in the same program as getarrow().
+        """
 
-        s = ''
+        s = ""
 
-        if os.name == 'nt':
+        if os.name == "nt":
             return msvcrt.getwch()
 
         else:
             return sys.stdin.read(1)
 
-
     def kbhit(self):
-        ''' Returns True if keyboard character was hit, False otherwise.
-        '''
-        if os.name == 'nt':
+        """Returns True if keyboard character was hit, False otherwise."""
+        if os.name == "nt":
             return msvcrt.kbhit()
 
         else:
-            dr,dw,de = select([sys.stdin], [], [], 0)
+            dr, dw, de = select([sys.stdin], [], [], 0)
             return dr != []
