@@ -11,7 +11,7 @@ def main():
     )
 
     script.add_argument(
-        "-n", "--words", default=20, type=int, help="Enter a words count for training"
+        "-n", "--words", default=10, type=int, help="Enter a words count for training"
     )
 
     script.add_argument(
@@ -19,18 +19,14 @@ def main():
     )
 
     script.add_argument(
-        "-o",
-        "--os",
-        default="Windows",
-        type=str,
-        help="Enter the name of your operating system",
+        "-f", "--file", default="konstitucia-rf", type=str, help="Enter a filename for parse"
     )
 
     args = script.parse_args()
 
-    user = User.User(UserState.State.PLAYING, args.os)
+    user = User.User(UserState.State.PLAYING, args.user)
 
-    a = app.Application(args.words, user)
+    a = app.Application(args.words, user, args.file)
 
     a.run_app()
 

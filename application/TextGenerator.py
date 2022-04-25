@@ -1,18 +1,22 @@
 import re
 import random
+from typing import NoReturn, List
 
 NOT_WORLD_PATTERN = r"[-:,.!?;{}\d(,)]"
-MAX_WORD_COUNT = 20
+MAX_WORD_COUNT = 5
 
 
 class TextGenerator:
-    def __init__(self, word_count):
-        self.word_count = word_count
+    """Генерирует рандомные слова из заданного текста"""
 
-    @staticmethod
-    def parse_text():
-        with open("konstitucia-rf.txt", encoding="utf-8") as f, open(
-            "kons.txt", "w"
+    def __init__(self, word_count: int, filename: str):
+        self.word_count = word_count
+        self.file_name = filename
+
+    def parse_text(self) -> NoReturn:
+        """Парсинг исходного текста в файл со словами """
+        with open(self.file_name, encoding="utf-8") as f, open(
+                "../res.txt", "w"
         ) as fw:
             line = f.readline()
             while line:
@@ -22,8 +26,9 @@ class TextGenerator:
                         fw.write(word.lower() + "\n")
                 line = f.readline()
 
-    def get_random_words(self):
-        with open("kons.txt", "rb") as f:
+    def get_random_words(self) -> List[str]:
+        """Выдаёт рандомную последовательность слов"""
+        with open("res.txt", "rb") as f:
             result = []
             try:
                 f.seek(-10, 2)

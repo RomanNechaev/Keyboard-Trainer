@@ -1,81 +1,123 @@
-from user import User
+from typing import List, NoReturn
+from user import User, UserState
 from application import TextGenerator
-from application import Statistics
-from application import KBHit
-import textwrap
-import sys
 import time
-from colorama import init, Fore
+import curses
+from curses import wrapper
+from textwrap import fill
+
+SPECIAL_SYMBOLS = ("KEY_BACKSPACE", "\b", "\x7f")
+EXIT_KEY = 27
 
 
 class Application:
-    def __init__(self, words_count: int, user: User):
-        self.mistakes = 0
+    def __init__(self, words_count: int, user: User, file_name: str) -> NoReturn:
+        self.words_count = words_count
         self.user = user
-        self.text = TextGenerator.TextGenerator(words_count).get_random_words()
-        self.gen = self.get_generator()
+        self.user.state = UserState.State.PLAYING
+        self.text = TextGenerator.TextGenerator(words_count, file_name).get_random_words()
+        self.file_name = file_name
 
-    def run_app(self):
-        self.show_text()
-        user_input = self.timed_input("\nLets Go\n", 5)
-        user_words = self.parse_to_world(user_input)
-        stat = Statistics.Statistics(user_words, self.text)
-        stat.find_mistakes()
-        print(stat)
+    def run_app(self) -> NoReturn:
+        wrapper(self.main)
 
-    def words_for_parse(self):
-        words = list(map(lambda x: x.replace("\n", ""), self.text))
-        words = list(map(lambda x: x.__add__(" "), words))
-        return words
+    def start_screen(self, stdscr: curses) -> NoReturn:
+        stdscr.clear()
+        stdscr.addstr(
+            f"Привет,{self.user.name}! Давай проверим твою скорость набора текста"
+        )
+        stdscr.addstr("\nНажми любую клавишу чтобы начать")
+        stdscr.refresh()
+        stdscr.getkey()
 
-    @staticmethod
-    def parse_to_world(user_input):
-        raw_input = user_input
-        words = []
-        word = []
-        for i in range(len(raw_input)):
-            if raw_input[i] != " ":
-                word.append(raw_input[i])
+    def get_wrapper_position(self, formatted: str) -> List[int]:
+        """Возвращает позицци, на которых был произведен перенос строки"""
+        symbols_list = list(formatted)
+        wrap_positions = []
+        for i in range(len(symbols_list)):
+            if symbols_list[i] == "\n":
+                wrap_positions.append(i)
+        return wrap_positions
+
+    def display_text(
+            self, stdscr: curses, current: List[str], wpm: int, accuracy: float
+    ) -> NoReturn:
+        """Отображает на экран исходный текст, текущий символ, wpm,точность набора и подчеркивает ошибку"""
+        text = " ".join(self.text)
+        formatted = fill(text, width=50)
+        stdscr.addstr(formatted)
+        wrap_positions = self.get_wrapper_position(formatted)
+        current_wrap = 0
+        wrap = wrap_positions[current_wrap]
+        stdscr.addstr(len(wrap_positions) + 2, 0, f"WPM:{wpm}")
+        stdscr.addstr(len(wrap_positions) + 3, 0, f"accuracy:{accuracy}")
+        for i, char in enumerate(current):
+            correct_char = text[i]
+            color = curses.color_pair(1)
+            if char != correct_char:
+                color = curses.color_pair(2)
+                self.user.mistakes += 1
+            if i > wrap:
+                stdscr.addstr(current_wrap + 1, i - wrap - 1, char, color)
+                if current_wrap < len(wrap_positions) - 1:
+                    if i == wrap_positions[current_wrap + 1]:
+                        wrap = wrap_positions[current_wrap + 1]
+                        current_wrap += 1
             else:
-                if raw_input[i - 1] != " ":
-                    words.append("".join(word))
-                    word = []
-        return words
+                stdscr.addstr(0, i, char, color)
 
-    def get_generator(self):
-        words = self.words_for_parse()
-        gen = (j for i in words for j in i)
-        return gen
+    def wpm_test(self, stdscr: curses) -> NoReturn:
+        """Вычисление скорости набора текста"""
+        raw_current_text = []
+        start_time = time.time()
+        stdscr.timeout(-1)
+        text = " ".join(self.text)
+        while self.user.state == UserState.State.PLAYING:
+            time_elapsed = max(time.time() - start_time, 1)
+            self.user.wpm = self.calculate_wpm(raw_current_text, time_elapsed)
+            self.user.accuracy = self.calculate_accuracy(self.user.mistakes, text)
+            stdscr.clear()
+            self.display_text(
+                stdscr, raw_current_text, self.user.wpm, self.user.accuracy
+            )
+            stdscr.refresh()
+            current_text = "".join(raw_current_text)
+            if current_text == text:
+                stdscr.nodelay(False)
+                break
+            try:
+                key = chr(stdscr.getch())
+            except curses.error:
+                raise Exception("something wrong:(")
 
-    def show_text(self):
-        formatted = textwrap.fill(" ".join(self.text), width=50, initial_indent="" * 10)
-        print(formatted)
+            if ord(key) == EXIT_KEY:
+                self.user.state = UserState.State.EXIT
+                break
+            if key in SPECIAL_SYMBOLS and len(raw_current_text) > 0:
+                raw_current_text.pop()
+            elif len(current_text) < len(" ".join(self.text)):
+                raw_current_text.append(key)
 
-    def timed_input(self, caption, timeout):
-        init(autoreset=True)
-        kb = KBHit.KBHit()
+    def calculate_wpm(self, current_text: List[str], time_elapsed: float) -> int:
+        """Вычисление значения скорости набора"""
+        return round((len(current_text) / (time_elapsed / 60)) / 5)
 
-        def echo(c):
-            sys.stdout.write(c)
-            sys.stdout.flush()
+    def calculate_accuracy(self, mistakes: int, text: str) -> float:
+        """Вычисление точности набора"""
+        return round((1 - (mistakes / (len(text)))) * 100, 2)
 
-        echo(caption)
-        result = []
-        start = time.monotonic()
-        try:
-            while time.monotonic() - start < timeout:
-                if kb.kbhit():
-                    c = kb.getch()
-                    if self.gen.__next__() != c:
-                        print(Fore.BLUE + "->", end="")
-                    if ord(c) == 13:
-                        echo("\r\n")
-                        break
+    def main(self, stdscr: curses) -> NoReturn:
+        curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
+        curses.init_pair(2, curses.COLOR_RED, curses.COLOR_BLACK)
+        curses.init_pair(3, curses.COLOR_WHITE, curses.COLOR_BLACK)
+        self.start_screen(stdscr)
 
-                    result.append(str(c))
-                    echo(c)
-        except StopIteration:
-            pass
-
-        if result:
-            return result
+        while self.user.state == UserState.State.PLAYING:
+            self.wpm_test(stdscr)
+            stdscr.addstr(2, 0, "Нажими любую клавишу чтобы начать снова...")
+            key = chr(stdscr.getch())
+            self.text = TextGenerator.TextGenerator(self.words_count, self.file_name).get_random_words()
+            self.user.mistakes = 0
+            if ord(key) == EXIT_KEY:
+                self.user.state = UserState.State.EXIT
+                break

@@ -1,4 +1,3 @@
-import platform
 from dataclasses import dataclass
 from user import UserState
 
@@ -7,4 +6,6 @@ from user import UserState
 class User:
     state: UserState
     name: str
-    os_name: str = platform.system()
+    wpm: int = 0
+    accuracy: int = 0
+    mistakes: int = 0
