@@ -14,9 +14,9 @@ class TextGenerator:
         self.file_name = filename
 
     def parse_text(self) -> NoReturn:
-        """Парсинг исходного текста в файл со словами """
+        """Парсинг исходного текста в файл со словами"""
         with open(self.file_name, encoding="utf-8") as f, open(
-                "../res.txt", "w"
+            "../res.txt", "w", encoding="utf-8"
         ) as fw:
             line = f.readline()
             while line:
@@ -29,16 +29,16 @@ class TextGenerator:
     def get_random_words(self) -> List[str]:
         """Выдаёт рандомную последовательность слов"""
         with open("res.txt", "rb") as f:
-            result = []
             try:
+                result = []
                 f.seek(-10, 2)
                 end_file = f.tell() + 1
                 rnd_position = random.randint(1, end_file)
                 f.seek(rnd_position)
             except Exception:
-                raise Exception("asdsd")
-            for i in range(1, self.word_count):
-                word = f.readline().decode("cp1251").replace("\r\n", "")
+                raise Exception("something wrong")
+            for i in range(0, self.word_count+1):
+                word = f.readline().decode(errors="ignore").replace("\r\n", "")
                 result.append(word)
         result.remove(result[0])
         random.shuffle(result)
