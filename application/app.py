@@ -6,8 +6,9 @@ import curses
 from curses import wrapper
 from textwrap import fill
 
-SPECIAL_SYMBOLS = ("KEY_BACKSPACE", "\b", "\x7f")
+SPECIAL_SYMBOLS = (263, "BS", "KEY_BACKSPACE", "\b", "\x7f")
 EXIT_KEY = 27
+STRING_LENGTH = 50
 
 
 class Application:
@@ -15,7 +16,9 @@ class Application:
         self.words_count = words_count
         self.user = user
         self.user.state = UserState.State.PLAYING
-        self.text = TextGenerator.TextGenerator(words_count, file_name).get_random_words()
+        self.text = TextGenerator.TextGenerator(
+            words_count, file_name
+        ).get_random_words()
         self.file_name = file_name
 
     def run_app(self) -> NoReturn:
@@ -44,11 +47,15 @@ class Application:
     ) -> NoReturn:
         """Отображает на экран исходный текст, текущий символ, wpm,точность набора и подчеркивает ошибку"""
         text = " ".join(self.text)
-        formatted = fill(text, width=50)
+        formatted = fill(text, width=STRING_LENGTH)
         stdscr.addstr(formatted)
-        wrap_positions = self.get_wrapper_position(formatted)
         current_wrap = 0
-        wrap = wrap_positions[current_wrap]
+        if len(text) > STRING_LENGTH:
+            wrap_positions = self.get_wrapper_position(formatted)
+            wrap = wrap_positions[current_wrap]
+        else:
+            wrap_positions = [0]
+            wrap = STRING_LENGTH + 1
         stdscr.addstr(len(wrap_positions) + 2, 0, f"WPM:{wpm}")
         stdscr.addstr(len(wrap_positions) + 3, 0, f"accuracy:{accuracy}")
         for i, char in enumerate(current):
@@ -70,7 +77,7 @@ class Application:
         """Вычисление скорости набора текста"""
         raw_current_text = []
         start_time = time.time()
-        stdscr.timeout(-1)
+        stdscr.timeout(-100)
         text = " ".join(self.text)
         while self.user.state == UserState.State.PLAYING:
             time_elapsed = max(time.time() - start_time, 1)
@@ -86,11 +93,13 @@ class Application:
                 stdscr.nodelay(False)
                 break
             try:
-                key = chr(stdscr.getch())
+                key = stdscr.get_wch()
             except curses.error:
                 raise Exception("something wrong:(")
-
-            if ord(key) == EXIT_KEY:
+            if type(key) is str and key == EXIT_KEY:
+                self.user.state = UserState.State.EXIT
+                break
+            elif type(key) is str and ord(key) == EXIT_KEY:
                 self.user.state = UserState.State.EXIT
                 break
             if key in SPECIAL_SYMBOLS and len(raw_current_text) > 0:
@@ -115,9 +124,17 @@ class Application:
         while self.user.state == UserState.State.PLAYING:
             self.wpm_test(stdscr)
             stdscr.addstr(2, 0, "Нажими любую клавишу чтобы начать снова...")
-            key = chr(stdscr.getch())
-            self.text = TextGenerator.TextGenerator(self.words_count, self.file_name).get_random_words()
+            try:
+                key = stdscr.get_wch()
+            except curses.error:
+                raise Exception("something wrong:(")
+            self.text = TextGenerator.TextGenerator(
+                self.words_count, self.file_name
+            ).get_random_words()
             self.user.mistakes = 0
-            if ord(key) == EXIT_KEY:
+            if type(key) is str and key == EXIT_KEY:
+                self.user.state = UserState.State.EXIT
+                break
+            elif type(key) is str and ord(key) == EXIT_KEY:
                 self.user.state = UserState.State.EXIT
                 break
