@@ -1,13 +1,14 @@
-from application import app
+from application import App
 import argparse
 from user import User
 from user import UserState
+from application import TextGenerator
 
 
 def main():
     script_name = "Keyboard trainer"
     script = argparse.ArgumentParser(
-        usage=f"{script_name} [-n WORDS COUNT] [-u USER_NAME] [-o OS]"
+        usage=f"{script_name} [-n WORDS COUNT] [-u USER_NAME] [-f filename]"
     )
 
     script.add_argument(
@@ -19,14 +20,14 @@ def main():
     )
 
     script.add_argument(
-        "-f", "--file", default="konstitucia-rf", type=str, help="Enter a filename for parse"
+        "-f", "--file", default="konstitucia-rf.txt", type=str, help="Enter a filename for parse"
     )
 
     args = script.parse_args()
 
     user = User.User(UserState.State.PLAYING, args.user)
-
-    a = app.Application(args.words, user, args.file)
+    text_generator = TextGenerator.TextGenerator(args.words, args.file)
+    a = App.Application(user, text_generator)
 
     a.run_app()
 

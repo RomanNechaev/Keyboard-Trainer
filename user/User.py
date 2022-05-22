@@ -1,4 +1,7 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+
+from typing import List
+
 from user import UserState
 
 
@@ -8,4 +11,4 @@ class User:
     name: str
     wpm: int = 0
     accuracy: int = 0
-    mistakes: int = 0
+    mistakes: List[str] = field(default_factory=list)
