@@ -84,4 +84,6 @@ class Application(WIndowTools.WindowTools):
                 self.menu.init_window(stdscr)
             elif type(key) is str and ord(key) in MENU_KEY:
                 self.menu.init_window(stdscr)
+            else:
+                self.trainer.wpm_test(stdscr)
             stdscr.refresh()
