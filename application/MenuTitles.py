@@ -2,8 +2,8 @@ from enum import Enum
 
 
 class MenuTitles(Enum):
-    SINGLE_PLAY = "press O одиночная игра ---"
+    SINGLE_PLAY = "нажми O |одиночная игра|"
     MENU = "   МЕНЮ   "
-    MULTIPLAYER = "press G многопользовательская игра ---"
-    SETTINGS = "press S настройки ---"
-    STAT = "press N статистика ---"
+    MULTIPLAYER = "нажми G |многопользовательская игра|"
+    SETTINGS = "нажми S |настройки|"
+    STAT = "нажми N |статистика|"
