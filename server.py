@@ -5,12 +5,14 @@ from collections import namedtuple
 
 
 class Server:
-    def __init__(self):
+    def __init__(self, players_number):
         self.serv_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.serv_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.clients = []
         self.stat = []
         self.thread_list = []
+        self.players_number = players_number
+        self.ready_players = []
 
     def start_server(self):
         self.serv_socket.bind(("127.0.0.1", 1488))
@@ -24,18 +26,36 @@ class Server:
                 self.thread_list.append(thread)
                 client_sock.send(f"Игрок {client_addres} подключился".encode())
 
-            if len(self.thread_list) == 2:
+            if len(self.thread_list) == self.players_number:
                 client_without_self = self.clients.copy()
                 client_without_self.remove((client_sock, client_addres))
                 for cl in client_without_self:
                     cl[0].send(f"Игрок {client_addres} подключился".encode())
                     client_sock.send(f"Игрок {cl[1]} подключился".encode())
-
+                for cl in self.clients:
+                    ready_thread = Thread(target=self.wait_ready_message, args=cl).start()
+                    Client_ready = namedtuple('Client_ready', ['thread', 'client'])
+                    self.ready_players.append(Client_ready(ready_thread, cl))
                 for client in self.clients:
                     client[0].send("yes".encode())
                     time.sleep(0.1)
+                while True:
+                    if all(not x.ready_thread.is_alive() for x in self.ready_players):
+                        break
+                    for ready_player in self.ready_players:
+                        if not ready_player.thread.is_alive():
+                            for client in self.clients:
+                                if client != ready_player.client:
+                                    client.send("ready".encode())
+                # TODO: Не проверял, возможно баги в коде с 42-49
                 self.start_game(self.thread_list)
                 exit_listener.start()
+
+    def wait_ready_message(self, connection):
+        while True:
+            ready = connection.recv(1024)
+            if ready:
+                break
 
     def handle(self, connection, client_addres):
         raw_data = connection.recv(1024)
@@ -73,7 +93,7 @@ class Server:
 
 
 if __name__ == "__main__":
-    t = Server()
+    t = Server(players_number=2)
     t.start_server()
 
 # TODO: добавить сохранение информации

@@ -1,35 +1,66 @@
 import socket
-from application import App
 from user import User
-from user import UserState
-from application import TextGenerator
+from application import Trainer
+from curses.textpad import rectangle
+import time
 
 
-def client():
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    host = "localhost"
-    port = 1488
-    sock.connect((host, port))
-    ready_message = sock.recv(1024).decode()
-    while ready_message != "yes":
-        print(ready_message)
-        ready_message = sock.recv(1024).decode()
-    name = input("Введите имя")
-    user = User.User(UserState.State.PLAYING, name)
-    text_generator = TextGenerator.TextGenerator(1, "konstitucia-rf.txt")
-    a = App.Application(user, text_generator)
+class Client:
+    def __init__(self, user: User, trainer: Trainer):
+        self.user = user
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.host = "localhost"
+        self.port = 1488
+        self.trainer = trainer
 
-    a.run_app()
+    def run_client(self, stdscr):
+        stdscr.clear()
+        self.sock.connect((self.host, self.port))
+        ready_message = self.sock.recv(1024).decode()
+        stdscr.nodelay(1)
+        # self.create_lobby(stdscr)
+        connection = 1
+        while ready_message != "yes":
+            if connection > 1:
+                self.update_lobby(stdscr, ready_message, connection)
+            else:
+                self.create_lobby(stdscr, ready_message, connection)
+            stdscr.getch()
+            ready_message = self.sock.recv(1024).decode()
+            connection += 1
+        #TODO: добавить кнопку с готовностью, отправить сообщение о готовности серверу
+        # обновлять готовность другого игрока, когда поток(проверки готовности) закончит свою работу
+        time.sleep(30)
+        stdscr.clear()
+        stdscr.refresh()
+        stdscr.nodelay(0)
+        time.sleep(5)
+        self.trainer.wpm_test(stdscr)
 
-    sock.send(f"{a.user.wpm}{name}".encode())
-    data = sock.recv(1024)
-    print(data.decode())
-    data2 = sock.recv(1024)
-    print(data2.decode())
+        self.sock.send(f"{self.user.wpm} {self.user.name}".encode())
+        data = self.sock.recv(1024)
+        print(data.decode())
+        data2 = self.sock.recv(1024)
+        print(data2.decode())
 
+    def create_lobby(self, stdscr, message, connection):
+        window_coordinate = stdscr.getmaxyx()
+        y, x = window_coordinate[0], window_coordinate[1]
+        stdscr.addstr(3, x // 2 - 15, f"Комната 1. Игроков {connection}/2")
+        rectangle(stdscr, 5, x // 2 - 20, 8, x - 10)
+        stdscr.addstr(5 + connection, x // 2 - 18, message)
 
-if __name__ == "__main__":
-    client()
+    def update_lobby(self, stdscr, message, connection):
+        window_coordinate = stdscr.getmaxyx()
+        y, x = window_coordinate[0], window_coordinate[1]
+        stdscr.addstr(3, x // 2 - 15, f"Комната 1. Игроков {connection}/2")
+        stdscr.addstr(5 + connection, x // 2 - 18, message)
 
-# TODO: добавить комнаты
+    def wait_other_ready_player(self):
+        pass
+    # TODO: другой поток, который ждет готовности от первого юзера
+# if __name__ == "__main__":
+#     selfclient()
+
+# TODO: добавить  2 комнату
 # TODO: начать игру по готовности юзеров
