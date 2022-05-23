@@ -2,16 +2,19 @@ import curses
 from user import User
 from application import MenuTitles
 from application import WIndowTools
+import client
 
 KEY_O = ("O", "o", "Щ", "щ")
 KEY_N = ("N", "n", "т", "Т")
 KEY_S = ("S", "s", "С", "с")
+KEY_G = ("G", "g", "П", "п")
 
 
 class Menu(WIndowTools.WindowTools):
     def __init__(self, user: User, trainer):
         self.user = user
         self.trainer = trainer
+        self.client = client.Client(user, trainer)
 
     def init_window(self, stdscr):
         stdscr.clear()
@@ -47,13 +50,14 @@ class Menu(WIndowTools.WindowTools):
         stdscr.refresh()
 
     def choice_game_type(self, key, stdscr):
-        try:
+        # try:
             if key in KEY_O:
                 self.trainer.wpm_test(stdscr)
-
+            elif key in KEY_G:
+                self.client.run_client(stdscr)
         # elif key in
-        except Exception:
-            raise Exception("something wrong:(")
+        # except Exception:
+        #     raise Exception("something wrong:(")
 
     def redraw_window(self, stdscr):
         stdscr.clear()
