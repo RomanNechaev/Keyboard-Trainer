@@ -15,7 +15,7 @@ class Server:
         self.ready_players = []
 
     def start_server(self):
-        self.serv_socket.bind(("127.0.0.1", 1488))
+        self.serv_socket.bind(("127.0.0.1", 1981))
         exit_listener = Thread(target=self.get_results)
         while True:
             self.serv_socket.listen(5)
@@ -32,21 +32,22 @@ class Server:
                 for cl in client_without_self:
                     cl[0].send(f"Игрок {client_addres} подключился".encode())
                     client_sock.send(f"Игрок {cl[1]} подключился".encode())
-                for cl in self.clients:
-                    ready_thread = Thread(target=self.wait_ready_message, args=cl).start()
-                    Client_ready = namedtuple('Client_ready', ['thread', 'client'])
-                    self.ready_players.append(Client_ready(ready_thread, cl))
+                # for cl in self.clients:
+                #     ready_thread = Thread(target=self.wait_ready_message, args=cl)
+                #     ready_thread.start()
+                #     Client_ready = namedtuple('Client_ready', ['thread', 'client'])
+                #     self.ready_players.append(Client_ready(ready_thread, cl))
                 for client in self.clients:
                     client[0].send("yes".encode())
                     time.sleep(0.1)
-                while True:
-                    if all(not x.ready_thread.is_alive() for x in self.ready_players):
-                        break
-                    for ready_player in self.ready_players:
-                        if not ready_player.thread.is_alive():
-                            for client in self.clients:
-                                if client != ready_player.client:
-                                    client.send("ready".encode())
+                # while True:
+                #     if all(not x.thread.is_alive() for x in self.ready_players):
+                #         break
+                #     for ready_player in self.ready_players:
+                #         if not ready_player.thread.is_alive():
+                #             for client in self.clients:
+                #                 if client != ready_player.client:
+                #                     client.send("ready".encode())
                 # TODO: Не проверял, возможно баги в коде с 42-49
                 self.start_game(self.thread_list)
                 exit_listener.start()

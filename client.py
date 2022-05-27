@@ -10,7 +10,7 @@ class Client:
         self.user = user
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.host = "localhost"
-        self.port = 1488
+        self.port = 1981
         self.trainer = trainer
 
     def run_client(self, stdscr):
@@ -30,7 +30,6 @@ class Client:
             connection += 1
         #TODO: добавить кнопку с готовностью, отправить сообщение о готовности серверу
         # обновлять готовность другого игрока, когда поток(проверки готовности) закончит свою работу
-        time.sleep(30)
         stdscr.clear()
         stdscr.refresh()
         stdscr.nodelay(0)
