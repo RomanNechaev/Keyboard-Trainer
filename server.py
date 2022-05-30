@@ -15,7 +15,7 @@ class Server:
         self.ready_players = []
 
     def start_server(self):
-        self.serv_socket.bind(("127.0.0.1", 1981))
+        self.serv_socket.bind(("https://keyboardtrainerserver.herokuapp.com/", 1981))
         exit_listener = Thread(target=self.get_results)
         while True:
             self.serv_socket.listen(5)
