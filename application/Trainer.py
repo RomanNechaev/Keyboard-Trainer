@@ -5,19 +5,18 @@ import time
 import curses
 from textwrap import fill
 from application import WIndowTools
+from application import KEYS
 
-SPECIAL_SYMBOLS = (263, "BS", "KEY_BACKSPACE", "\b", "\x7f", 8)
-EXIT_KEY = 27
 STRING_LENGTH = 50
 
 
 class Trainer(WIndowTools.WindowTools):
 
-    def __init__(self, user: User, text_generator: TextGenerator) -> NoReturn:
+    def __init__(self, user: User, text_generator: TextGenerator, word_count: int) -> NoReturn:
         self.user = user
         self.user.state = UserState.State.PLAYING
         self.text_generator = text_generator
-        self.text = self.text_generator.get_random_words()
+        self.text = self.text_generator.get_random_words(word_count)
         self.average_word_length = text_generator.get_average_word_length()
 
     @staticmethod
@@ -70,7 +69,7 @@ class Trainer(WIndowTools.WindowTools):
                         current_wrap += 1
             else:
                 stdscr.addstr(0, i, char, color)
-        if incorrect_char and key not in SPECIAL_SYMBOLS:
+        if incorrect_char and key not in KEYS.SPECIAL_SYMBOLS:
             self.user.mistakes.append(incorrect_char)
 
         return
@@ -126,11 +125,11 @@ class Trainer(WIndowTools.WindowTools):
                 self.display_text(
                     stdscr, raw_current_text, self.user.wpm, self.user.accuracy, key
                 )
-            if type(key) is str and key == EXIT_KEY:
+            if type(key) is str and key == KEYS.EXIT_KEY:
                 break
-            elif type(key) is str and ord(key) == EXIT_KEY:
+            elif type(key) is str and ord(key) == KEYS.EXIT_KEY:
                 break
-            if key in SPECIAL_SYMBOLS and len(raw_current_text) > 0:
+            if key in KEYS.SPECIAL_SYMBOLS and len(raw_current_text) > 0:
                 raw_current_text.pop()
             elif len(current_text) < len(text):
                 raw_current_text.append(key)

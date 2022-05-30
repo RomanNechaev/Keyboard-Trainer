@@ -26,8 +26,8 @@ def main():
     args = script.parse_args()
 
     user = User.User(UserState.State.PLAYING, args.user)
-    text_generator = TextGenerator.TextGenerator(args.words, args.file)
-    a = App.Application(user, text_generator)
+    text_generator = TextGenerator.TextGenerator(args.file)
+    a = App.Application(user, text_generator, args.words)
 
     a.run_app()
 

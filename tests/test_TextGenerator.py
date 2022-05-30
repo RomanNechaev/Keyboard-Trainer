@@ -6,7 +6,7 @@ import re
 
 class TextGeneratorTests(unittest.TestCase):
     def setUp(self):
-        self.text_gen = TextGenerator.TextGenerator(10, "konstitucia-rf.txt")
+        self.text_gen = TextGenerator.TextGenerator("konstitucia-rf.txt")
         self.text_gen.parse_text()
 
     def test_only_words_in_file(self):
@@ -20,13 +20,13 @@ class TextGeneratorTests(unittest.TestCase):
 
     def test_get_correct_random_length(self):
         rnd_count = random.randint(1, 100)
-        text_gen2 = TextGenerator.TextGenerator(rnd_count, "tests/test.txt")
-        words = text_gen2.get_random_words()
+        text_gen2 = TextGenerator.TextGenerator("tests/test.txt")
+        words = text_gen2.get_random_words(rnd_count)
         self.assertEqual(len(words), rnd_count)
 
     def test_generate_different_words_sequence(self):
-        first_words_sequence = self.text_gen.get_random_words()
-        second_words_sequence = self.text_gen.get_random_words()
+        first_words_sequence = self.text_gen.get_random_words(10)
+        second_words_sequence = self.text_gen.get_random_words(10)
         difference = None
         for i in range(10):
             if first_words_sequence[i] != second_words_sequence:
@@ -49,8 +49,6 @@ class TextGeneratorTests(unittest.TestCase):
         self.assertEqual(4.0, self.text_gen.get_average_word_length("tests/words.txt"))
 
     def test_initialization_class(self):
-        word_count = 10
         file_name = "konstitucia-rf.txt"
-        test_text_gen = TextGenerator.TextGenerator(word_count, file_name)
-        self.assertEqual(word_count, test_text_gen.word_count)
+        test_text_gen = TextGenerator.TextGenerator(file_name)
         self.assertEqual(file_name, test_text_gen.file_name)

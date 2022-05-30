@@ -6,18 +6,17 @@ from curses import wrapper
 from application import Trainer
 from application import Menu
 from application import WIndowTools
-
-EXIT_KEY = 27
-MENU_KEY = ("m", "M", 'ь', 'Ь')
+from application import KEYS
 
 
 class Application(WIndowTools.WindowTools):
-    def __init__(self, user: User, text_generator: TextGenerator) -> NoReturn:
+    def __init__(self, user: User, text_generator: TextGenerator, word_count: int) -> NoReturn:
         self.user = user
         self.user.state = UserState.State.PLAYING
         self.text_generator = text_generator
-        self.trainer = Trainer.Trainer(user, text_generator)
+        self.trainer = Trainer.Trainer(user, text_generator, word_count)
         self.menu = Menu.Menu(user, self.trainer)
+        self.word_count = word_count
 
     def run_app(self) -> NoReturn:
         """Запустить приложение"""
@@ -69,20 +68,20 @@ class Application(WIndowTools.WindowTools):
                 key = stdscr.get_wch()
             except curses.error:
                 raise Exception("something wrong:(")
-            self.trainer.text = self.text_generator.get_random_words()
+            self.trainer.text = self.text_generator.get_random_words(word_count=self.word_count)
             self.trainer.user.mistakes = []
             while key == curses.KEY_RESIZE:
                 key = stdscr.get_wch()
                 stdscr.refresh()
-            if type(key) is str and key == EXIT_KEY:
+            if type(key) is str and key == KEYS.EXIT_KEY:
                 self.trainer.user.state = UserState.State.EXIT
                 break
-            elif type(key) is str and ord(key) == EXIT_KEY:
+            elif type(key) is str and ord(key) == KEYS.EXIT_KEY:
                 self.trainer.user.state = UserState.State.EXIT
                 break
-            elif type(key) is str and key in MENU_KEY:
+            elif type(key) is str and key in KEYS.EXIT_KEY:
                 self.menu.init_window(stdscr)
-            elif type(key) is str and ord(key) in MENU_KEY:
+            elif type(key) is str and ord(key) in KEYS.EXIT_KEY:
                 self.menu.init_window(stdscr)
             else:
                 self.trainer.wpm_test(stdscr)
