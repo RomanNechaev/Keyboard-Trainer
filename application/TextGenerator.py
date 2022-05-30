@@ -10,7 +10,6 @@ NOT_WORLD_PATTERN = r"[-:,.!?;{}\d(,)]"
 class TextGenerator:
     """Генерирует рандомные слова из заданного текста"""
 
-    word_count: int
     file_name: str
 
     def parse_text(self) -> NoReturn:
@@ -26,7 +25,8 @@ class TextGenerator:
                         fw.write(word.lower() + "\n")
                 line = f.readline()
 
-    def get_random_words(self) -> List[str]:
+    @staticmethod
+    def get_random_words(word_count: int) -> List[str]:
         """Выдаёт рандомную последовательность слов"""
         with open("res.txt", "rb") as f:
             try:
@@ -37,7 +37,7 @@ class TextGenerator:
                 f.seek(rnd_position)
             except Exception:
                 raise Exception("something wrong")
-            for i in range(0, self.word_count + 1):
+            for i in range(0, word_count + 1):
                 word = f.readline().decode(errors="ignore").replace("\r\n", "")
                 result.append(word)
         result.remove(result[0])
