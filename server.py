@@ -32,29 +32,33 @@ class Server:
                 for cl in client_without_self:
                     cl[0].send(f"Игрок {client_addres} подключился".encode())
                     client_sock.send(f"Игрок {cl[1]} подключился".encode())
-                # for cl in self.clients:
-                #     ready_thread = Thread(target=self.wait_ready_message, args=cl)
-                #     ready_thread.start()
-                #     Client_ready = namedtuple('Client_ready', ['thread', 'client'])
-                #     self.ready_players.append(Client_ready(ready_thread, cl))
-                for client in self.clients:
-                    client[0].send("yes".encode())
-                    time.sleep(0.1)
-                # while True:
-                #     if all(not x.thread.is_alive() for x in self.ready_players):
-                #         break
-                #     for ready_player in self.ready_players:
-                #         if not ready_player.thread.is_alive():
-                #             for client in self.clients:
-                #                 if client != ready_player.client:
-                #                     client.send("ready".encode())
+                self.notify_clients(message="yes")
+                for cle in self.clients:
+                    ready_thread = Thread(target=self.wait_ready_message, args=(cle[0],))
+                    ready_thread.start()
+                    Client_ready = namedtuple('Client_ready', ['thread', 'client', 'dispatched'])
+                    self.ready_players.append(
+                        Client_ready(ready_thread, client=cle[0], dispatched={'dispatched': False}))
+                while True:
+                    if all(not x.thread.is_alive() for x in self.ready_players):
+                        break
+                    for ready_player in self.ready_players:
+                        if not ready_player.thread.is_alive() and not ready_player.dispatched['dispatched']:
+                            for client in self.clients:
+                                if client[0] != ready_player.client:
+                                    client[0].send("ready".encode())
+                                    ready_player.dispatched['dispatched'] = True
+                print(2)
                 # TODO: Не проверял, возможно баги в коде с 42-49
+                time.sleep(0.1)
+                # self.notify_clients(message="all clients ready")
                 self.start_game(self.thread_list)
                 exit_listener.start()
 
-    def wait_ready_message(self, connection):
+    @staticmethod
+    def wait_ready_message(cl):
         while True:
-            ready = connection.recv(1024)
+            ready = cl.recv(1024)
             if ready:
                 break
 
@@ -91,6 +95,11 @@ class Server:
         for user in self.stat:
             result += f"{user.ip} aka {user.name} набрал {user.wpm}\n"
         return result
+
+    def notify_clients(self, message):
+        for client in self.clients:
+            client[0].send(message.encode())
+            time.sleep(0.1)
 
 
 if __name__ == "__main__":
