@@ -3,12 +3,17 @@ import random
 from dataclasses import dataclass
 from typing import NoReturn, List
 
-NOT_WORLD_PATTERN = r"[-:,.!?;{}\d(,)]"
+NOT_WORLD_PATTERN = r"[-:,.!?;{}\d(,)«»<>]"
 
 
 @dataclass
 class TextGenerator:
-    """Генерирует рандомные слова из заданного текста"""
+    """Генерирует рандомные слова из заданного текста
+
+
+    Ключевые аргументы:
+    filaname -- файл, из которого будут парситься слова
+    """
 
     file_name: str
 
@@ -27,7 +32,12 @@ class TextGenerator:
 
     @staticmethod
     def get_random_words(word_count: int) -> List[str]:
-        """Выдаёт рандомную последовательность слов"""
+        """Выдаёт рандомную последовательность слов
+
+
+        Ключевые аргументы:
+        word_count -- количество слов в рандомной последовательности слов
+        """
         with open("res.txt", "rb") as f:
             try:
                 result = []
@@ -38,7 +48,12 @@ class TextGenerator:
             except Exception:
                 raise Exception("something wrong")
             for i in range(0, word_count + 1):
-                word = f.readline().decode(errors="ignore").replace("\r\n", "")
+                word = (
+                    f.readline()
+                        .decode(errors="ignore")
+                        .replace("\r\n", "")
+                        .replace("\n", "")
+                )
                 result.append(word)
         result.remove(result[0])
         random.shuffle(result)
@@ -46,7 +61,11 @@ class TextGenerator:
 
     @staticmethod
     def get_average_word_length(filename="res.txt") -> float:
-        """Возращает среднюю длину слова в тексте"""
+        """Возращает среднюю длину слова в тексте
+
+
+        filaname -- файл из которого считается среедняя длина слов
+        """
         all_words_length = 0
         count = 0
         s = []

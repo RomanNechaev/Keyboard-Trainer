@@ -1,18 +1,17 @@
 from typing import List, NoReturn
 from user import User, UserState
-from application import TextGenerator
+from application import text_generator, wIndow_tools, keys
 import time
 import curses
 from textwrap import fill
-from application import WIndowTools
-from application import KEYS
 
 STRING_LENGTH = 50
 
 
-class Trainer(WIndowTools.WindowTools):
-
-    def __init__(self, user: User, text_generator: TextGenerator, word_count: int) -> NoReturn:
+class Trainer(wIndow_tools.WindowTools):
+    def __init__(
+        self, user: User, text_generator: text_generator, word_count: int
+    ) -> NoReturn:
         self.user = user
         self.user.state = UserState.State.PLAYING
         self.text_generator = text_generator
@@ -35,7 +34,7 @@ class Trainer(WIndowTools.WindowTools):
         return wrap_positions
 
     def display_text(
-            self, stdscr: curses, current: List[str], wpm: int, accuracy: float, key
+        self, stdscr: curses, current: List[str], wpm: int, accuracy: float, key
     ) -> NoReturn:
         """Отображает на экран исходный текст, текущий символ, wpm,точность набора и подчеркивает ошибку.
 
@@ -69,7 +68,7 @@ class Trainer(WIndowTools.WindowTools):
                         current_wrap += 1
             else:
                 stdscr.addstr(0, i, char, color)
-        if incorrect_char and key not in KEYS.SPECIAL_SYMBOLS:
+        if incorrect_char and key not in keys.SPECIAL_SYMBOLS:
             self.user.mistakes.append(incorrect_char)
 
         return
@@ -104,7 +103,9 @@ class Trainer(WIndowTools.WindowTools):
         text = " ".join(self.text)
         while self.user.state == UserState.State.PLAYING:
             time_elapsed = max(time.time() - start_time, 1)
-            self.user.wpm = self.calculate_wpm(raw_current_text, time_elapsed, self.average_word_length)
+            self.user.wpm = self.calculate_wpm(
+                raw_current_text, time_elapsed, self.average_word_length
+            )
             self.user.accuracy = self.calculate_accuracy(self.user.mistakes, text)
             stdscr.clear()
             self.display_text(
@@ -125,11 +126,11 @@ class Trainer(WIndowTools.WindowTools):
                 self.display_text(
                     stdscr, raw_current_text, self.user.wpm, self.user.accuracy, key
                 )
-            if type(key) is str and key == KEYS.EXIT_KEY:
+            if type(key) is str and key == keys.EXIT_KEY:
                 break
-            elif type(key) is str and ord(key) == KEYS.EXIT_KEY:
+            elif type(key) is str and ord(key) == keys.EXIT_KEY:
                 break
-            if key in KEYS.SPECIAL_SYMBOLS and len(raw_current_text) > 0:
+            if key in keys.SPECIAL_SYMBOLS and len(raw_current_text) > 0:
                 raw_current_text.pop()
             elif len(current_text) < len(text):
                 raw_current_text.append(key)
@@ -143,7 +144,9 @@ class Trainer(WIndowTools.WindowTools):
         stdscr.refresh()
 
     @staticmethod
-    def calculate_wpm(current_text: List[str], time_elapsed: float, average_word_length: float) -> int:
+    def calculate_wpm(
+        current_text: List[str], time_elapsed: float, average_word_length: float
+    ) -> int:
         """Вычисление значения скорости набора текста.
 
 

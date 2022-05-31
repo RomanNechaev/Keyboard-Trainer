@@ -1,8 +1,8 @@
-from application import App
+from application import app
 import argparse
 from user import User
 from user import UserState
-from application import TextGenerator
+from application import text_generator
 
 
 def main():
@@ -20,14 +20,18 @@ def main():
     )
 
     script.add_argument(
-        "-f", "--file", default="konstitucia-rf.txt", type=str, help="Enter a filename for parse"
+        "-f",
+        "--file",
+        default="konstitucia-rf.txt",
+        type=str,
+        help="Enter a filename for parse",
     )
 
     args = script.parse_args()
 
     user = User.User(UserState.State.PLAYING, args.user)
-    text_generator = TextGenerator.TextGenerator(args.file)
-    a = App.Application(user, text_generator, args.words)
+    text_generator = text_generator.TextGenerator(args.file)
+    a = app.Application(user, text_generator, args.words)
 
     a.run_app()
 

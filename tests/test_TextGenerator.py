@@ -1,4 +1,4 @@
-from application import TextGenerator
+from application import text_generator
 import unittest
 import random
 import re
@@ -6,7 +6,7 @@ import re
 
 class TextGeneratorTests(unittest.TestCase):
     def setUp(self):
-        self.text_gen = TextGenerator.TextGenerator("konstitucia-rf.txt")
+        self.text_gen = text_generator.TextGenerator("konstitucia-rf.txt")
         self.text_gen.parse_text()
 
     def test_only_words_in_file(self):
@@ -20,7 +20,7 @@ class TextGeneratorTests(unittest.TestCase):
 
     def test_get_correct_random_length(self):
         rnd_count = random.randint(1, 100)
-        text_gen2 = TextGenerator.TextGenerator("tests/test.txt")
+        text_gen2 = text_generator.TextGenerator("tests/test.txt")
         words = text_gen2.get_random_words(rnd_count)
         self.assertEqual(len(words), rnd_count)
 
@@ -50,5 +50,5 @@ class TextGeneratorTests(unittest.TestCase):
 
     def test_initialization_class(self):
         file_name = "konstitucia-rf.txt"
-        test_text_gen = TextGenerator.TextGenerator(file_name)
+        test_text_gen = text_generator.TextGenerator(file_name)
         self.assertEqual(file_name, test_text_gen.file_name)
