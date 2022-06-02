@@ -4,6 +4,8 @@ import time
 from collections import namedtuple
 from typing import NoReturn
 from typing import List
+from db import orm
+from user import User, UserState
 
 
 class Server:
@@ -79,7 +81,7 @@ class Server:
                 exit_listener.start()
 
     @staticmethod
-    def wait_ready_message(cl: socket) -> NoReturn:
+    def wait_ready_message(cl: socket.socket) -> NoReturn:
         """Ожидание ответа от клиента
 
         Ключевые аргументы:
@@ -90,7 +92,7 @@ class Server:
             if ready:
                 break
 
-    def handle(self, connection: socket, client_address: str) -> NoReturn:
+    def handle(self, connection: socket.socket, client_address: str) -> NoReturn:
         """Собирает данные юзера после завершенной игры
 
 
@@ -100,8 +102,8 @@ class Server:
         """
         raw_data = connection.recv(1024)
         data = raw_data.decode().split(" ")
-        User_stat = namedtuple("User_stat", ["wpm", "ip", "name"])
-        self.stat.append(User_stat(wpm=data[0], ip=client_address, name=data[1]))
+        User_stat = namedtuple("User_stat", ["wpm", "ip", "name", "accuracy"])
+        self.stat.append(User_stat(wpm=data[0], ip=client_address, name=data[1], accuracy=data[2]))
         connection.send(f"Результаты:".encode())
 
     def notify_client_about_result(self) -> NoReturn:
@@ -132,6 +134,8 @@ class Server:
         self.stat.sort(key=lambda x: x.wpm)
         for user in self.stat:
             result += f"{user.ip} aka {user.name} набрал {user.wpm}\n"
+            real_user = User.User(UserState.State.WAITING, user.name, user.wpm, user.accuracy)
+            orm.insert(real_user)
         return result
 
     def notify_clients(self, message: str) -> NoReturn:

@@ -74,7 +74,7 @@ class Client:
 
         self.prepare_to_game(color, stdscr)
         self.trainer.wpm_test(stdscr)
-        self.sock.send(f"{self.user.wpm} {self.user.name}".encode())
+        self.sock.send(f"{self.user.wpm} {self.user.name} {self.user.accuracy}".encode())
         data = self.sock.recv(1024)
         data2 = self.sock.recv(1024)
         self.print_result(data, data2)

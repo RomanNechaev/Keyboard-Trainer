@@ -10,13 +10,13 @@ STRING_LENGTH = 50
 
 class Trainer(wIndow_tools.WindowTools):
     def __init__(
-            self, user: User, text_gen: text_generator.TextGenerator, word_count: int
+            self, user: User, text_generator, word_count: int
     ) -> NoReturn:
         self.user = user
         self.user.state = UserState.State.PLAYING
-        self.text_generator = text_gen
+        self.text_generator = text_generator
         self.text = self.text_generator.get_random_words(word_count)
-        self.average_word_length = text_gen.get_average_word_length()
+        self.average_word_length = text_generator.get_average_word_length()
 
     @staticmethod
     def get_wrapper_position(formatted: str) -> List[int]:
