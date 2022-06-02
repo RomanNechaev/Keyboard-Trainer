@@ -10,13 +10,13 @@ STRING_LENGTH = 50
 
 class Trainer(wIndow_tools.WindowTools):
     def __init__(
-        self, user: User, text_generator: text_generator, word_count: int
+            self, user: User, text_gen: text_generator.TextGenerator, word_count: int
     ) -> NoReturn:
         self.user = user
         self.user.state = UserState.State.PLAYING
-        self.text_generator = text_generator
+        self.text_generator = text_gen
         self.text = self.text_generator.get_random_words(word_count)
-        self.average_word_length = text_generator.get_average_word_length()
+        self.average_word_length = text_gen.get_average_word_length()
 
     @staticmethod
     def get_wrapper_position(formatted: str) -> List[int]:
@@ -34,15 +34,15 @@ class Trainer(wIndow_tools.WindowTools):
         return wrap_positions
 
     def display_text(
-        self, stdscr: curses, current: List[str], wpm: int, accuracy: float, key
+            self, stdscr: curses, current: List[str], wpm: int, accuracy: float, key
     ) -> NoReturn:
         """Отображает на экран исходный текст, текущий символ, wpm,точность набора и подчеркивает ошибку.
 
 
         Ключевые аргументы:
-        stdscr -- главное окно
-        current -- текущий текст
-        wpm -- текущая скорость набора
+        stdscr -- главное окно\n
+        current -- текущий текст\n
+        wpm -- текущая скорость набора\n
         accuracy -- текущая точность набора
         """
         text = " ".join(self.text)
@@ -73,13 +73,13 @@ class Trainer(wIndow_tools.WindowTools):
 
         return
 
-    def wrap_init(self, current_wrap, formatted, text):
+    def wrap_init(self, current_wrap: int, formatted: str, text: str):
         """Инициализация списка переноса строк и начального индекса переноса строки.
 
 
         Ключевые аргументы:
-        current_wrap -- текущее индекс переноса строки
-        formatted -- отформатированный текст
+        current_wrap -- текущее индекс переноса строки\n
+        formatted -- отформатированный текст\n
         text - исходный текст
         """
         if len(text) > STRING_LENGTH:
@@ -135,23 +135,34 @@ class Trainer(wIndow_tools.WindowTools):
             elif len(current_text) < len(text):
                 raw_current_text.append(key)
 
-    def redraw_window(self, stdscr):
+    def redraw_window(self, stdscr: curses) -> NoReturn:
+        """Перерисовка окна
+
+
+        Ключевые аргументы:
+        stdscr -- главное окно"""
         stdscr.clear()
         stdscr.refresh()
 
-    def init_window(self, stdscr):
+    def init_window(self, stdscr: curses) -> NoReturn:
+        """Инициализация окна
+
+
+        Ключевые аргументы:
+        stdscr -- главное окно
+        """
         stdscr.clear()
         stdscr.refresh()
 
     @staticmethod
     def calculate_wpm(
-        current_text: List[str], time_elapsed: float, average_word_length: float
+            current_text: List[str], time_elapsed: float, average_word_length: float
     ) -> int:
         """Вычисление значения скорости набора текста.
 
 
         Ключевые аргументы:
-        current_text -- текущий текст
+        current_text -- текущий текст\n
         time_elapsed -- время в сек, прошедшее с начала набора
         """
         return round((len(current_text) / (time_elapsed / 60)) / average_word_length)
@@ -162,7 +173,7 @@ class Trainer(wIndow_tools.WindowTools):
 
 
         Ключевые аргументы:
-        mistakes -- количествно неправильных символов
+        mistakes -- количествно неправильных символов\n
         text -- исходный текст
         """
         return round((1 - (len(mistakes) / (len(text)))) * 100, 2)

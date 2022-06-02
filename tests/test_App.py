@@ -1,16 +1,17 @@
 from application import text_generator, trainer
 from application import app
+from application import trainer
 from user import User, UserState
 import unittest
 from unittest.mock import MagicMock
-import curses
+from application import keys
 
 
 class ApplicationTests(unittest.TestCase):
     def setUp(self):
-        self.text_gen = text_generator.TextGenerator(10, "../konstitucia-rf.txt")
+        self.text_gen = text_generator.TextGenerator("../konstitucia-rf.txt")
         user = User.User(UserState.State.PLAYING, "test")
-        self.app = app.Application(user, self.text_gen)
+        self.app = app.Application(user, self.text_gen, word_count=10)
 
     def test_correct_calculate_wpm(self):
         # 15 chr 30 sec -> 30 chr per min ->
@@ -126,3 +127,28 @@ class ApplicationTests(unittest.TestCase):
         self.assertTupleEqual(
             (51, [0]), self.app.trainer.wrap_init(current_wrap, formatted, text)
         )
+
+    def test_correct_initialization_wrap_with_other_data(self):
+        # STRING_LENGTH DEFAULT = 50
+        text = "a" * 100
+        current_wrap = 0
+        formatted = "aaaaaaaaaaaaaa\n" "aaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        self.assertTupleEqual(
+            (self.app.trainer.get_wrapper_position(formatted)[current_wrap],
+             self.app.trainer.get_wrapper_position(formatted)),
+            self.app.trainer.wrap_init(current_wrap, formatted, text)
+        )
+
+    def test_wpm_test_if_user_state_is_not_playing(self):
+        stdscr = MagicMock(addstr=MagicMock())
+        self.app.user.state = UserState.State.WAITING
+        self.app.trainer.wpm_test(stdscr)
+        self.assertEqual(self.app.user.wpm, 0)
+
+    def test_initialization_class(self):
+        user = User.User(UserState.State.WAITING, name="Vova")
+        word_count = 12
+        tr = trainer.Trainer(user, self.text_gen, word_count)
+        tt = trainer.Trainer(user, self.text_gen, word_count)
+        self.assertEqual(tr.user.name, tt.user.name)
+        self.assertEqual(tr.text_generator, self.text_gen)

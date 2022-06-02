@@ -48,7 +48,3 @@ class TextGeneratorTests(unittest.TestCase):
     def test_correct_calculate_average_words_length(self):
         self.assertEqual(4.0, self.text_gen.get_average_word_length("tests/words.txt"))
 
-    def test_initialization_class(self):
-        file_name = "konstitucia-rf.txt"
-        test_text_gen = text_generator.TextGenerator(file_name)
-        self.assertEqual(file_name, test_text_gen.file_name)

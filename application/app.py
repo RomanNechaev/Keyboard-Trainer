@@ -42,6 +42,11 @@ class Application(wIndow_tools.WindowTools):
         stdscr.refresh()
 
     def redraw_window(self, stdscr):
+        """Перерисовка окна
+
+        Ключевые аргументы:
+        stdscr -- главное окно
+        """
         stdscr.clear()
         stdscr.addstr(
             f"Привет,{self.user.name}! {app_consts.hello_message}"
@@ -50,6 +55,12 @@ class Application(wIndow_tools.WindowTools):
         stdscr.refresh()
 
     def main(self, stdscr: curses) -> NoReturn:
+        """ Инициализация всех окон приложения и обработка клавиш управления
+
+
+        Ключевые аргументы:
+        stdscr -- главное окно
+        """
         curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
         curses.init_pair(2, curses.COLOR_RED, curses.COLOR_BLACK)
         curses.init_pair(3, curses.COLOR_WHITE, curses.COLOR_BLACK)

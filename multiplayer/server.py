@@ -3,6 +3,7 @@ from threading import Thread
 import time
 from collections import namedtuple
 from typing import NoReturn
+from typing import List
 
 
 class Server:
@@ -19,8 +20,9 @@ class Server:
         self.user_names = {}
 
     def start_server(self) -> NoReturn:
+        """Запуск сервера и обработка клиентов"""
         self.serv_socket.bind(("localhost", 1981))
-        exit_listener = Thread(target=self.get_results)
+        exit_listener = Thread(target=self.notify_client_about_result)
         while True:
             self.serv_socket.listen(5)
             client_sock, client_address = self.serv_socket.accept()
@@ -77,7 +79,7 @@ class Server:
                 exit_listener.start()
 
     @staticmethod
-    def wait_ready_message(cl) -> NoReturn:
+    def wait_ready_message(cl: socket) -> NoReturn:
         """Ожидание ответа от клиента
 
         Ключевые аргументы:
@@ -88,15 +90,22 @@ class Server:
             if ready:
                 break
 
-    def handle(self, connection, client_address) -> NoReturn:
+    def handle(self, connection: socket, client_address: str) -> NoReturn:
+        """Собирает данные юзера после завершенной игры
+
+
+        Ключевые аргументы:
+        connection -- сокет клиента\n
+        client_address -- ip клиента
+        """
         raw_data = connection.recv(1024)
         data = raw_data.decode().split(" ")
         User_stat = namedtuple("User_stat", ["wpm", "ip", "name"])
         self.stat.append(User_stat(wpm=data[0], ip=client_address, name=data[1]))
-
         connection.send(f"Результаты:".encode())
 
-    def get_results(self) -> NoReturn:
+    def notify_client_about_result(self) -> NoReturn:
+        """Уведомление клиентов о результатах игры"""
         while True:
             if len(self.thread_list) != 0:
                 flag = False
@@ -104,12 +113,11 @@ class Server:
                     if n.is_alive():
                         flag = True
                 if flag is False and len(self.thread_list) == len(self.clients):
-                    for client in self.clients:
-                        client[0].send(self.get_stat().encode())
+                    self.notify_clients(self.get_stat())
                     break
 
     @staticmethod
-    def start_game(thread_list) -> NoReturn:
+    def start_game(thread_list: List[Thread]) -> NoReturn:
         """Запускает потоки обработки игры от разных клиентов
 
         Ключевые аргументы:
@@ -126,8 +134,13 @@ class Server:
             result += f"{user.ip} aka {user.name} набрал {user.wpm}\n"
         return result
 
-    def notify_clients(self, message) -> NoReturn:
-        """Отправляем уведомление всем клиентам сервера"""
+    def notify_clients(self, message: str) -> NoReturn:
+        """Отправляем уведомление всем клиентам сервера
+
+
+        Ключевые аргументы:
+        message -- уведомление
+        """
         for client in self.clients:
             client[0].send(message.encode())
             time.sleep(0.1)

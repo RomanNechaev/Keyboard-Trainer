@@ -6,12 +6,21 @@ from multiplayer import client
 
 
 class Menu(wIndow_tools.WindowTools):
+    """Представляет собой графический интерфейс, который обрабытывает клавиши пользователя и
+     переноправляет на соответсвующие окна"""
+
     def __init__(self, user: User, trainer) -> NoReturn:
         self.user = user
         self.trainer = trainer
         self.client = client.Client(user, trainer)
 
     def init_window(self, stdscr) -> NoReturn:
+        """Инициализация окна меню
+
+
+        Ключевые аргументы:
+        stdscr -- главное окно
+        """
         stdscr.clear()
         curses.init_pair(10, curses.COLOR_BLUE, curses.COLOR_BLACK)
         window_size = stdscr.getmaxyx()
@@ -57,6 +66,13 @@ class Menu(wIndow_tools.WindowTools):
         stdscr.refresh()
 
     def choice_game_type(self, key, stdscr) -> NoReturn:
+        """Выбор режима игры/приложения в зависимости от клавиши
+
+
+        Ключевые аргументы:
+        key -- клавиша пользователя\n
+        stdscr -- главное окно
+        """
         if key in keys.KEY_O:
             self.trainer.wpm_test(stdscr)
         elif key in keys.KEY_G:
@@ -64,6 +80,12 @@ class Menu(wIndow_tools.WindowTools):
             self.client.run_client(stdscr)
 
     def redraw_window(self, stdscr) -> NoReturn:
+        """Перерисовка окна
+
+
+        Ключевые аргументы:
+        stdscr -- главное окно
+        """
         stdscr.clear()
         window_size = stdscr.getmaxyx()
         coordinate_menu_x = (
@@ -101,9 +123,4 @@ class Menu(wIndow_tools.WindowTools):
             menu_titles.MenuTitles.STAT.value,
             curses.color_pair(10),
         )
-
         stdscr.refresh()
-
-    # TODO: Добавить логику меню(настройки, выбор типа игры и др)
-    # TODO: В настройках можно выбирать тип переноса курсора(с пробелом и без)
-    # TODO: добавить настройки, статистику, многопользовательский режим

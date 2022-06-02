@@ -9,6 +9,8 @@ from typing import NoReturn
 
 
 class Client:
+    """Клиент для игры по сети"""
+
     def __init__(self, user: User, trainer: trainer) -> NoReturn:
         self.user = user
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -17,6 +19,12 @@ class Client:
         self.trainer = trainer
 
     def run_client(self, stdscr) -> NoReturn:
+        """ Запуск клиента для игры по сети
+
+
+        Ключевые аргументы:
+        stdscr -- главное окно
+        """
         stdscr.clear()
         try:
             self.sock.connect((self.host, self.port))
@@ -62,7 +70,7 @@ class Client:
                 stdscr.getch()
                 break
 
-        self.wait_other_player(rdy_thread)
+        self.check_thread_completion(rdy_thread)
 
         self.prepare_to_game(color, stdscr)
         self.trainer.wpm_test(stdscr)
@@ -75,6 +83,12 @@ class Client:
 
     @staticmethod
     def prepare_to_game(color, stdscr):
+        """Подготовка окна к игре
+
+        Ключевые аргументы:
+        stdscr -- главное окно\n
+        color -- цвет символа
+        """
         stdscr.addstr(13, 13, clients_message.press_r, color)
         stdscr.getch()
         stdscr.clear()
@@ -83,19 +97,39 @@ class Client:
         stdscr.move(0, 0)
 
     @staticmethod
-    def wait_other_player(rdy_thread):
-        """Ожидание ответа другого игрока"""
+    def check_thread_completion(rdy_thread):
+        """Проверка завершение работы потока
+
+
+        Ключевые аргументы:
+        rdy_thread -- поток
+        """
         while True:
             if not rdy_thread.is_alive():
                 break
 
     @staticmethod
     def print_result(data_fist_client, data_second_client) -> NoReturn:
+        """Вывод результа от двух клиентов
+
+
+        Ключевые аргументы:
+        data_fist_client -- данные первого клиента\n
+        data_second_client -- данные второго клиента
+        """
         print(data_fist_client.decode())
         print(data_second_client.decode())
 
     @staticmethod
     def create_lobby(stdscr, message, connection_count) -> NoReturn:
+        """Создание и отрисовка графического участка под игроков
+
+
+        Ключевые аргументы:
+        stdscr -- главное окно\n
+        message -- сообщение от клиента\n
+        connection_count -- количество подключенных игроков
+        """
         window_coordinate = stdscr.getmaxyx()
         y, x = window_coordinate[0], window_coordinate[1]
         stdscr.addstr(3, x // 2 - 15, f"Комната 1. Игроков {connection_count}/2")
@@ -106,6 +140,14 @@ class Client:
 
     @staticmethod
     def update_lobby(stdscr, message, connection_count) -> NoReturn:
+        """Перерисовка графического участка под игроков
+
+
+        Ключевые аргументы:
+        stdscr -- главное окно\n
+        message -- сообщение от клиента\n
+        connection_count -- количество подключенных игроков
+        """
         window_coordinate = stdscr.getmaxyx()
         y, x = window_coordinate[0], window_coordinate[1]
         stdscr.addstr(3, x // 2 - 15, f"Комната 1. Игроков {connection_count}/2")
@@ -115,6 +157,13 @@ class Client:
         stdscr.addstr(12, 5, clients_message.press_two_space)
 
     def print_readiness_other_player(self, stdscr, indent) -> NoReturn:
+        """Ожидание и уведомление о готовности другого игрока
+
+
+        Ключевые аргументы:
+        stdscr -- главное окно\n
+        indent -- отступ от юзернэйма игрока
+        """
         stdscr.nodelay(0)
         while True:
             data = self.sock.recv(1024)
@@ -124,6 +173,14 @@ class Client:
 
     @staticmethod
     def draw_readiness(stdscr, indent) -> NoReturn:
+        """Отрисовка готовности игрока
+
+
+        Ключевые аргументы:
+        stdscr -- главное окно\n
+        indent -- отступ от юзернэйма игрока
+        """
+
         window_coordinate = stdscr.getmaxyx()
         y, x = window_coordinate[0], window_coordinate[1]
         stdscr.addstr(
