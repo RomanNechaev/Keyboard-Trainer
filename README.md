@@ -1,7 +1,9 @@
 # Keyboard-Trainer
 Simple keyboard-trainer for python task
 
-Contributors: Nechaev Roman(https://github.com/RomanNechaev), Ovakimyan Artak(https://github.com/ArtakOvakimyan);
+Contributors: 
+* Nechaev Roman(https://github.com/RomanNechaev)
+* Ovakimyan Artak(https://github.com/ArtakOvakimyan);
 ## Описание
 Простой клавиатурный тренажер с возможностью играть по сети.
 
