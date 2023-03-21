@@ -11,7 +11,7 @@ class TextGeneratorTests(unittest.TestCase):
 
     def test_only_words_in_file(self):
         NOT_WORLD_PATTERN = r"[-:,.!?;{}\d(,)]"
-        with open("res.txt", "r") as f:
+        with open("resources/res.txt", "r") as f:
             line = f.readline()
             while line:
                 res = re.findall(NOT_WORLD_PATTERN, line)
@@ -20,7 +20,7 @@ class TextGeneratorTests(unittest.TestCase):
 
     def test_get_correct_random_length(self):
         rnd_count = random.randint(1, 100)
-        text_gen2 = text_generator.TextGenerator("tests/test.txt")
+        text_gen2 = text_generator.TextGenerator("tests/resources/test.txt")
         words = text_gen2.get_random_words(rnd_count)
         self.assertEqual(len(words), rnd_count)
 
@@ -46,5 +46,5 @@ class TextGeneratorTests(unittest.TestCase):
     #     self.assertRaises(ZeroDivisionError, self.text_gen.get_average_word_length("empty.txt"))
 
     def test_correct_calculate_average_words_length(self):
-        self.assertEqual(4.0, self.text_gen.get_average_word_length("tests/words.txt"))
+        self.assertEqual(4.0, self.text_gen.get_average_word_length("tests/resources/words.txt"))
 
